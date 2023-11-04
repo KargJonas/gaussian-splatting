@@ -4,9 +4,10 @@ precision mediump float;
 #define E  2.71828182
 
 // Uniforms
-varying vec2 v_texCoord;
-uniform vec2 u_size;
+varying vec2  v_texCoord;
+uniform vec2  u_size;
 uniform float u_time;
+uniform float u_brightness;
 
 // Constanst (perf reasons)
 const float GAUSS_FACTOR = sqrt(2. * PI);
