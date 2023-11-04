@@ -1,4 +1,5 @@
 import Uniform from "./Uniform.ts";
+import Definition from "./Definition.ts";
 
 const quad = [
   -1, -1,
@@ -89,7 +90,7 @@ export default class WebGLContext {
     return program;
   }
 
-  initScene(vertexShaderSource: string, fragmentShaderSource: string, uniforms: Uniform[]) {
+  initScene(vertexShaderSource: string, fragmentShaderSource: string, uniforms: Uniform[], definitions: Definition[] = []) {
     const ctx = this.ctx;
 
     if (!ctx) {
@@ -99,9 +100,15 @@ export default class WebGLContext {
 
     this.uniforms = uniforms;
 
+    // Doing some preprocessing on the fragment shader to add definitions
+    const fragmentShaderPrefix = definitions
+      .map((definition) => definition.getCode())
+      .join('\n');
+
     // Create the vertex shader and fragment shader
+    const modifiedFragmentShaderSource = `${fragmentShaderPrefix}\n${fragmentShaderSource}`;
     const vertexShader = this.createShader(ctx, ctx.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = this.createShader(ctx, ctx.FRAGMENT_SHADER, fragmentShaderSource);
+    const fragmentShader = this.createShader(ctx, ctx.FRAGMENT_SHADER, modifiedFragmentShaderSource);
 
     // Create the WebGL program
     const program = this.createProgram(ctx, vertexShader, fragmentShader);
@@ -116,25 +123,16 @@ export default class WebGLContext {
     ctx.enableVertexAttribArray(positionAttributeLocation);
     ctx.vertexAttribPointer(positionAttributeLocation, 2, ctx.FLOAT, false, 0, 0);
 
-    // Set up the uniform for the texture
-    // const imageUniformLocation = ctx.getUniformLocation(program, 'u_image');
-    // ctx.uniform1i(imageUniformLocation, 0);
+    // Initializing builtin and user-defined uniforms
+    this.sizeUniform.init(ctx, program);
+    this.timeUniform.init(ctx, program);
+    this.uniforms.map((uniform) => uniform.init(ctx, program));
 
-    // Set up the resolution/time uniforms
-    // this.sizeUniformLocation = ctx.getUniformLocation(program, 'u_size')!;
-    // this.timeUniformLocation = ctx.getUniformLocation(program, 'u_time')!;
-
-    this.sizeUniform.initLocation(ctx, program);
-    this.timeUniform.initLocation(ctx, program);
+    // Setting size uniform value
     this.sizeUniform.set(this.cnv.width, this.cnv.height);
 
-    // All other user defined uniforms
-    this.uniforms.map((uniform) => uniform.initLocation(ctx, program))
-
     const texture = ctx.createTexture();
-
     ctx.bindTexture(ctx.TEXTURE_2D, texture);
-    // ctx.texImage2D(ctx.TEXTURE_2D, 0, ctx.RGBA, ctx.RGBA, ctx.UNSIGNED_BYTE, image);
     ctx.texParameteri(ctx.TEXTURE_2D, ctx.TEXTURE_WRAP_S, ctx.CLAMP_TO_EDGE);
     ctx.texParameteri(ctx.TEXTURE_2D, ctx.TEXTURE_WRAP_T, ctx.CLAMP_TO_EDGE);
     ctx.texParameteri(ctx.TEXTURE_2D, ctx.TEXTURE_MIN_FILTER, ctx.LINEAR);
