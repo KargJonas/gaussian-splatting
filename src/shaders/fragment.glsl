@@ -103,8 +103,7 @@ void main() {
 
         vec3 pos = unflatten3D(i);
         vec2 angle = vec2(
-//            (sin(u_time) + 1.) * .3,
-            .0,
+            (sin(u_time) + 1.) * .3,
             u_time * .75
         );
 

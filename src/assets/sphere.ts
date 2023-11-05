@@ -13,7 +13,7 @@ export default function sphere(pos: Vec3, i: number, scene: Scene) {
   const density = .06;
   const opacity = dist > .4
     ? 0
-    : .13;
+    : .4;
 
   return [...color, opacity, density];
 }
