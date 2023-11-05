@@ -6,9 +6,9 @@ export default class Scene {
   centroid: Vec3;             // Geometric center of scene [x, y, z]
   max_dim_size: number;       // Size of largest dimension ( =max(size_x, size_y, size_z) )
   n_gaussians: number;        // Number of gaussians in the scene
-  gauss_data: Float32Array;   // Raw gaussian data [r1, g1, b1, opac1, sigma1, r2, g2, ...]
+  gauss_data: Float32Array | undefined; // Raw gaussian data [r1, g1, b1, opac1, sigma1, r2, g2, ...]
 
-  constructor(shape: Vec3, gauss_data: Float32Array) {
+  constructor(shape: Vec3, gauss_data?: Float32Array) {
     this.shape = shape;
     this.centroid = shape.map((component) => component / 2);
     this.max_dim_size = Math.max(...shape);
@@ -16,7 +16,7 @@ export default class Scene {
     this.gauss_data = gauss_data;
   }
 
-  private getPosFromIndex(i) {
+  private getPosFromIndex(i: number) {
     let n_z_plane_items = this.shape[0] * this.shape[1];
     let z = (i / n_z_plane_items) | 0;
     i -= n_z_plane_items * z;

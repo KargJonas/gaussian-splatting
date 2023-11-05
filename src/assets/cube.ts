@@ -1,8 +1,4 @@
-import {Vec3} from "../util/types.ts";
-import Scene from "../Scene.ts";
-
-
-export default function cube(pos: Vec3, i: number, scene: Scene) {
+export default function cube() {
 
   const color = [1, 1, 1];
 
