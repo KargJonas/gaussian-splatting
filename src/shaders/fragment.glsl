@@ -7,8 +7,8 @@ precision mediump float;
 uniform vec2  u_size;   // BUILTIN
 uniform float u_time;   // BUILTIN
 uniform float brightness;
-uniform float gauss_data[n_gaussians * n_gauss_comps];
 uniform ivec3 scene_shape;
+uniform float gauss_data[n_gaussians * n_gauss_comps];
 
 // Constanst (perf reasons)
 const float GAUSS_FACTOR = sqrt(2. * PI);
@@ -66,17 +66,33 @@ vec3 unflatten3D( int i )
     return pos;
 }
 
-vec3 rotateVectorY(vec3 vector, float angle) {
-    float s = sin(angle);
-    float c = cos(angle);
+vec3 rotateVector(vec3 vector, vec2 angle) {
+    // First, apply the yaw rotation around the Y-axis.
+    float s_yaw = sin(angle.y);
+    float c_yaw = cos(angle.y);
 
-    mat3 rotationMatrix = mat3(
-        c, 0.0, s,
+    mat3 yawRotationMatrix = mat3(
+        c_yaw, 0.0, s_yaw,
         0.0, 1.0, 0.0,
-        -s, 0.0, c
+        -s_yaw, 0.0, c_yaw
     );
 
-    return rotationMatrix * vector;
+    vector = yawRotationMatrix * vector;
+    vector = yawRotationMatrix * vector;
+
+    // Then, apply the pitch rotation around the X-axis.
+    float s_pitch = sin(angle.x);
+    float c_pitch = cos(angle.x);
+
+    mat3 pitchRotationMatrix = mat3(
+        1.0, 0.0, 0.0,
+        0.0, c_pitch, -s_pitch,
+        0.0, s_pitch, c_pitch
+    );
+
+    vector = pitchRotationMatrix * vector;
+
+    return vector;
 }
 
 void main() {
@@ -84,6 +100,15 @@ void main() {
     vec4 fragColor = vec4(0.0);
 
     for (int i = 0; i < n_gaussians; i++) {
+
+        vec3 pos = unflatten3D(i);
+        vec2 angle = vec2(
+//            (sin(u_time) + 1.) * .3,
+            .0,
+            u_time * .75
+        );
+
+        vec3 adjusted_pos = rotateVector(pos, angle) + pos_offset;
 
         vec3 color = vec3(
             gauss_data[i * n_gauss_comps],
@@ -93,44 +118,11 @@ void main() {
 
         float opacity = gauss_data[i * n_gauss_comps + 3];
         float sigma =   gauss_data[i * n_gauss_comps + 4];
+        float d_sigma = 1. + (sin(u_time * .60 + 2.) + 1.) / 2. * 2.;
+        // float d_sigma = mod(u_time, 6.) < 2. ? 3. : 1.;  // no interploation
 
-        vec3 pos = unflatten3D(i);
-        pos = rotateVectorY(pos, u_time);
-//        pos = rotateVector(pos, 0., u_time);
-
-        addGauss(fragColor, pos + pos_offset, uv, color, opacity, sigma);
+        addGauss(fragColor, adjusted_pos, uv, color, opacity, sigma * d_sigma);
     }
 
     gl_FragColor = vec4(vec3(fragColor) * brightness, 1.0);
-
-//    if (gauss_data[(625 / 5) - 1] == .02) gl_FragColor = vec4(vec3(1.), 1.);
-//    else gl_FragColor = vec4(vec3(0.), 1.);
-
-//    gl_FragColor = vec4(vec3(gauss_data[25 * 5]), 1.);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

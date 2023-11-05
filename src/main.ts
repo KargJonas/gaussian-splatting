@@ -1,25 +1,31 @@
 import WebGLContext from "./lib/WebGLContext.ts";
 import Uniform from "./lib/Uniform.ts";
 import Definition from "./lib/Definition.ts";
+import Scene from "./Scene.ts";
 
+// Shaders
 import vertex from "./shaders/vertex.glsl";
 import fragment from "./shaders/fragment.glsl";
-import Scene from "./Scene.ts";
-import rainbow from "./assets/rainbow.ts";
+import rotation from "./shaders/rotation.glsl";
+
+// Assets
+import cube from "./assets/cube.ts";
 import sphere from "./assets/sphere.ts";
-
-const canvasWidth = 256;
-const canvasHeight = 256;
-
-const COMPONENTS_PER_GAUSSIAN = 5;
+import rainbow from "./assets/rainbow.ts";
 
 const canvas: HTMLCanvasElement | null = document.querySelector("canvas");
 const webglContext = new WebGLContext(canvas);
+
+const canvasWidth = 256;
+const canvasHeight = 256;
+const COMPONENTS_PER_GAUSSIAN = 5;
 
 const shape = [7, 7, 7];
 const brightness = 1;
 const z_dist = 1.5;
 
+// const scene = new Scene(shape).fromFn(cube);
+// const scene = new Scene(shape).fromFn(sphere);
 const scene = new Scene(shape).fromFn(rainbow);
 
 const definitions = [
