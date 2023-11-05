@@ -53,7 +53,7 @@ vec3 unflatten3D( int i )
     int n_z_plane_items = scene_shape.x * scene_shape.y;
 
     int z = i / n_z_plane_items;
-    i -= n_z_plane_items * z; // mod not supported todo: validate
+    i -= n_z_plane_items * z;
     int y = i / scene_shape.x;
     int x = i - y * scene_shape.x;
 
